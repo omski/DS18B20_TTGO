@@ -139,7 +139,7 @@ uint getDeviceCount() {
         printAddress(tempaddr); Serial.println();
     }
     Serial.print(" TTL Dallas Device Count:");
-    Serial.println(NumDallasActive, HEX);
+    Serial.println(NumDallasActive, DEC);
     // report parasite power requirements
     Serial.print(" Parasite power is: ");
     if (sensors.isParasitePowerMode()) Serial.println("ON");
