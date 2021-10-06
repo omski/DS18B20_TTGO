@@ -28,13 +28,12 @@ Button2 btn2(BUTTON_2);
 
 char buff[512];
 int vref = 1100;
-int btnCick = false;
 
 // GPIO where the DS18B20 is connected to
-const int oneWireBus = 17;
+const int OneWireBus = 17;
 
 // Setup a oneWire instance to communicate with any OneWire devices
-OneWire oneWire(oneWireBus);
+OneWire oneWire(OneWireBus);
 
 // Pass our oneWire reference to Dallas Temperature sensor 
 DallasTemperature sensors(&oneWire);
@@ -139,10 +138,9 @@ uint getDeviceCount() {
         Serial.print(" address : ");
         printAddress(tempaddr); Serial.println();
     }
-
     Serial.print(" TTL Dallas Device Count:");
     Serial.println(NumDallasActive, HEX);
-
+    // report parasite power requirements
     Serial.print(" Parasite power is: ");
     if (sensors.isParasitePowerMode()) Serial.println("ON");
     else Serial.println("OFF");
@@ -225,8 +223,6 @@ void setup()
         sensors.getAddress(temp, thermos[s]);
         sensors.setResolution(temp, SensorResolution, false);
     }
-
-    // report parasite power requirements
 
     if (TFT_BL > 0) { // TFT_BL has been set in the TFT_eSPI library in the User Setup file TTGO_T_Display.h
          pinMode(TFT_BL, OUTPUT); // Set backlight pin to output mode
