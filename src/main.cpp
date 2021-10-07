@@ -67,6 +67,11 @@ void button_init()
             Serial.println("Fahrenheit.");
         }
     });
+
+    btn2.setPressedHandler([](Button2 &b) {
+        Serial.print("clear screen");
+        tft.fillScreen(TFT_BLACK);
+    });
 }
 
 void button_loop()
@@ -148,6 +153,17 @@ uint getDeviceCount() {
     return NumDallasActive;
 }
 
+String getTemp(const uint8_t* deviceAddress) {
+    float val;
+    if (showCelsius) {
+        val = sensors.getTempC(deviceAddress);
+    } else {
+        val = sensors.getTempF(deviceAddress);
+    }
+    if (val == -127.0) return "N.A.";
+    return String(val);
+}
+
 void showTemps()
 {
     static uint64_t timeStamp = 0;
@@ -172,13 +188,10 @@ void showTemps()
             printTemperature(tempAddress);
             Serial.println();
 
-            float temperature;
             if (showCelsius) {
-                temperature = sensors.getTempC(tempAddress);
-                temp += "T"+String(s+1)+" " + String(temperature) + " C\n";
+                temp += "T"+String(s+1)+" " + getTemp(tempAddress) + " C\n";
             } else {
-                temperature = sensors.getTempF(tempAddress);
-                temp += "T"+String(s+1)+" " + String(temperature) + " F\n";
+                temp += "T"+String(s+1)+" " + getTemp(tempAddress) + " F\n";
             }
             
         }
