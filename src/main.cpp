@@ -22,7 +22,7 @@
 #define BUTTON_1        35
 #define BUTTON_2        0
 
-TFT_eSPI tft = TFT_eSPI(135, 240); // Invoke custom library
+TFT_eSPI tft = TFT_eSPI(); // Invoke custom library
 Button2 btn1(BUTTON_1);
 Button2 btn2(BUTTON_2);
 
@@ -161,7 +161,7 @@ String getTemp(const uint8_t* deviceAddress) {
         val = sensors.getTempF(deviceAddress);
     }
     if (val == -127.0) return "N.A.";
-    return String(val);
+    return String(val) + (showCelsius?"÷C":"÷F");
 }
 
 void showTemps()
@@ -187,20 +187,14 @@ void showTemps()
             Serial.print(" ");
             printTemperature(tempAddress);
             Serial.println();
-
-            if (showCelsius) {
-                temp += "T"+String(s+1)+" " + getTemp(tempAddress) + " C\n";
-            } else {
-                temp += "T"+String(s+1)+" " + getTemp(tempAddress) + " F\n";
-            }
-            
+            temp += "T"+String(s+1)+" " + getTemp(tempAddress) + "\n";            
         }
         tft.print(temp);
         //tft.drawString(temp,  tft.width() / 2, tft.height() / 2 );
         // report voltage level through serial only
         uint16_t v = analogRead(ADC_PIN);
         float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
-        String voltage = "Voltage :" + String(battery_voltage) + "V";
+        String voltage = "Voltage: " + String(battery_voltage) + "V";
         tft.setTextSize(1);
         tft.print(voltage);
         Serial.println(voltage);
@@ -214,6 +208,7 @@ void setup()
     tft.init();
     tft.fillScreen(TFT_BLACK);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    
     tft.setCursor(0, 0);
     tft.setTextDatum(MC_DATUM);
     tft.setTextSize(2);
