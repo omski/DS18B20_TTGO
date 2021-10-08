@@ -91,18 +91,19 @@ void printAddress(DeviceAddress deviceAddress)
 }
 
 // function to print the temperature for a device
-void printTemperature(DeviceAddress deviceAddress)
+float printTemperature(DeviceAddress deviceAddress)
 {
   float tempC = sensors.getTempC(deviceAddress);
   if(tempC == DEVICE_DISCONNECTED_C) 
   {
     Serial.println("Error: Could not read temperature data");
-    return;
+    return tempC;
   }
   Serial.print(" Temp C: ");
   Serial.print(tempC);
   Serial.print(" Temp F: ");
   Serial.print(DallasTemperature::toFahrenheit(tempC));
+  return tempC;
 }
 
 // function to print a device's resolution
@@ -153,15 +154,14 @@ uint getDeviceCount() {
     return NumDallasActive;
 }
 
-String getTemp(const uint8_t* deviceAddress) {
-    float val;
-    if (showCelsius) {
-        val = sensors.getTempC(deviceAddress);
-    } else {
-        val = sensors.getTempF(deviceAddress);
-    }
-    if (val == -127.0) return "N.A.";
-    return String(val) + (showCelsius?"÷C":"÷F");
+void showVoltage() {
+    // report voltage level
+    uint16_t v = analogRead(ADC_PIN);
+    float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
+    String voltage = "Voltage: " + String(battery_voltage) + "V";
+    tft.setTextSize(1);
+    tft.print(voltage);
+    Serial.println(voltage);
 }
 
 void showTemps()
@@ -171,7 +171,6 @@ void showTemps()
         timeStamp = millis();
         tft.setCursor(0, 0);
         tft.setTextSize(2);
-
         tft.setTextDatum(MC_DATUM);
         
         sensors.requestTemperatures();
@@ -181,23 +180,23 @@ void showTemps()
         for (int s = 0; s < thermos.size(); s++) {
             uint deviceIndex = thermos[s];
             sensors.getAddress(tempAddress, deviceIndex);
-            
-            Serial.print("Device Address: ");
+            Serial.print("Device Index "); Serial.print(deviceIndex, DEC);
+            Serial.print(" Device Address: ");
             printAddress(tempAddress);
             Serial.print(" ");
-            printTemperature(tempAddress);
+            float val = printTemperature(tempAddress);
             Serial.println();
-            temp += "T"+String(s+1)+" " + getTemp(tempAddress) + "\n";            
+            if (val != DEVICE_DISCONNECTED_C) {
+                sprintf(buff, "%d% 8.2f%s\n",s+1,val,(showCelsius?"÷C":"÷F") );
+            } else {
+                sprintf(buff, "%d N.A.\n",s+1);
+            }
+            temp += buff;
+            // temp += String(s+1)+ " " + ( val != DEVICE_DISCONNECTED_C ? String(val) : "N.A.") + (showCelsius?"÷C":"÷F") + "\n";            
         }
         tft.print(temp);
         //tft.drawString(temp,  tft.width() / 2, tft.height() / 2 );
-        // report voltage level through serial only
-        uint16_t v = analogRead(ADC_PIN);
-        float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
-        String voltage = "Voltage: " + String(battery_voltage) + "V";
-        tft.setTextSize(1);
-        tft.print(voltage);
-        Serial.println(voltage);
+        showVoltage();
     }   
 }
 
