@@ -177,6 +177,9 @@ void showTemps()
 
         DeviceAddress tempAddress;
         String temp;
+
+
+
         for (int s = 0; s < thermos.size(); s++) {
             uint deviceIndex = thermos[s];
             sensors.getAddress(tempAddress, deviceIndex);
@@ -187,7 +190,7 @@ void showTemps()
             float val = printTemperature(tempAddress);
             Serial.println();
             if (val != DEVICE_DISCONNECTED_C) {
-                sprintf(buff, "%d% 8.2f%s\n",s+1,val,(showCelsius?"÷C":"÷F") );
+                sprintf(buff, "%d% 8.2f%s\n",s+1,(showCelsius?val:DallasTemperature::toFahrenheit(val)),(showCelsius?"÷C":"÷F") );
             } else {
                 sprintf(buff, "%d N.A.\n",s+1);
             }
